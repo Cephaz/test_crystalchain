@@ -3,34 +3,72 @@
 require 'json'
 require 'date'
 
-def calculate_time_component(start_date, end_date, price_per_day)
-  num_days = (Date.parse(end_date) - Date.parse(start_date)).to_i + 1
-  num_days * price_per_day
+# id            :integer
+# price_per_day :integer
+# price_per_km  :integer
+class Car
+  attr_accessor :id, :price_per_day, :price_per_km
+
+  def initialize(id, price_per_day, price_per_km)
+    @id = id
+    @price_per_day = price_per_day
+    @price_per_km = price_per_km
+  end
 end
 
-def calculate_distance_component(distance, price_per_km)
-  distance * price_per_km
-end
+# id          :integer
+# car_id      :integer
+# start_date  :date
+# end_date    :date
+# distance    :integer
+class Rental
+  attr_accessor :id, :car, :start_date, :end_date, :distance
 
-def calculate_total_price(time_component, distance_component)
-  time_component + distance_component
-end
+  def initialize(id, car, start_date, end_date, distance)
+    @id = id
+    @car = car
+    @start_date = start_date
+    @end_date = end_date
+    @distance = distance
+  end
 
-def process_rental(rental, car)
-  time_component = calculate_time_component(rental['start_date'], rental['end_date'], car['price_per_day'])
-  distance_component = calculate_distance_component(rental['distance'], car['price_per_km'])
-  total_price = calculate_total_price(time_component, distance_component)
+  def calculate_time_component
+    num_days = (@end_date - @start_date).to_i + 1
+    num_days * @car.price_per_day
+  end
 
-  {
-    'id' => rental['id'],
-    'price' => total_price
-  }
+  def calculate_distance_component
+    @distance * @car.price_per_km
+  end
+
+  def calculate_total_price
+    time_component = calculate_time_component
+    distance_component = calculate_distance_component
+    time_component + distance_component
+  end
+
+  def to_h
+    {
+      id: @id,
+      price: calculate_total_price
+    }
+  end
 end
 
 input = JSON.parse(File.read('data/input.json'))
-rentals = input['rentals'].map do |rental|
-  car = input['cars'].find { |c| c['id'] == rental['car_id'] }
-  process_rental(rental, car)
+
+cars = {}
+input['cars'].each do |car_json|
+  car = Car.new(car_json['id'], car_json['price_per_day'], car_json['price_per_km'])
+  cars[car.id] = car
+end
+
+rentals = input['rentals'].map do |rental_json|
+  car = cars[rental_json['car_id']]
+  start_date = Date.parse(rental_json['start_date'])
+  end_date = Date.parse(rental_json['end_date'])
+  rental = Rental.new(rental_json['id'], car, start_date, end_date, rental_json['distance'])
+  rental.to_h
 end
 
 output = { 'rentals' => rentals }
