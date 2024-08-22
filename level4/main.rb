@@ -2,6 +2,7 @@
 
 require 'json'
 require 'date'
+require 'ostruct'
 
 PRICE_DECREASES = [
   { threshold: 1, discount: 0.1 },  # 10%
@@ -63,7 +64,7 @@ end
 def build_actions(context)
   FEE_TYPES.map do |fee_type|
     amount = context.send(fee_type[:method])
-    { 'who' => fee_type[:who], 'type' => fee_type[:type], 'amount' => amount }
+    { who: fee_type[:who], type: fee_type[:type], amount: amount }
   end
 end
 
@@ -83,8 +84,8 @@ def process_rental(rental, car)
     drivy_fee: commission_details[:drivy_fee]
   )
   {
-    'id' => rental['id'],
-    'actions' => build_actions(context)
+    id: rental['id'],
+    actions: build_actions(context)
   }
 end
 

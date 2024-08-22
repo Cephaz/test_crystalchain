@@ -37,8 +37,8 @@ def process_rental(rental, car)
   total_price = calculate_total_price(time_component, distance_component)
 
   {
-    'id' => rental['id'],
-    'price' => total_price
+    id: rental['id'],
+    price: total_price
   }
 end
 

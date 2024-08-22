@@ -56,9 +56,9 @@ def process_rental(rental, car)
   commission_details = calculate_commission(total_price, num_days)
 
   {
-    'id' => rental['id'],
-    'price' => total_price,
-    'commission' => commission_details
+    id: rental['id'],
+    price: total_price,
+    commission: commission_details
   }
 end
 
